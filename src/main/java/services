@@ -1,9 +1,0 @@
-// filepath: c:\Users\User\Desktop\Personal projects\PapelariaABC-Website\src\main\java\services\ExampleService.java
-package services;
-
-import org.springframework.stereotype.Service;
-
-@Service
-public class ExampleService {
-    // Business logic methods will be added here
-}
