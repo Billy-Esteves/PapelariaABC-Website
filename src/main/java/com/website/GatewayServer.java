@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
-public class GatewayServer extends UnicastRemoteObject implements Gateway {
+public class GatewayServer extends UnicastRemoteObject implements GatewayInterface {
     
     /**
      * Default constructor for GatewayServer.

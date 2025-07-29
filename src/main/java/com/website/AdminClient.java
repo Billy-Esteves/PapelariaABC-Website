@@ -4,7 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 
-public class AdminClient extends UnicastRemoteObject implements Admin {
+public class AdminClient extends UnicastRemoteObject implements AdminInterface {
 
     protected AdminClient() throws RemoteException {
         super();

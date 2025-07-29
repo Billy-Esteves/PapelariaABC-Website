@@ -1,4 +1,8 @@
-/mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/website/Gateway.java
-/mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/website/Admin.java
+/mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/website/DatabaseInterface.java
+/mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/website/DatabaseManager.java
 /mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/website/GatewayServer.java
+/mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/service/ABCWebsiteApplication.java
+/mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/website/GatewayInterface.java
+/mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/controller/WebsiteController.java
 /mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/website/AdminClient.java
+/mnt/c/Users/User/Desktop/Personal projects/PapelariaABC-Website/src/main/java/com/website/AdminInterface.java
