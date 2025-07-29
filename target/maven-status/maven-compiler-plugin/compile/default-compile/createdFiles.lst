@@ -1,3 +1,4 @@
-com/example/WebsiteApplication.class
-com/example/AdminClient.class
-com/example/AdminController.class
+com/website/AdminClient.class
+com/website/GatewayServer.class
+com/website/Admin.class
+com/website/Gateway.class
