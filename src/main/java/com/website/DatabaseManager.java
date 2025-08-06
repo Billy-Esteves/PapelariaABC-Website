@@ -1,13 +1,36 @@
 package com.website;
 
+// for excel file reading
+///////////////////////////////////////////////////////
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+///////////////////////////////////////////////////////
+
+import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
+import java.util.ArrayList;
+import java.awt.image.BufferedImage;
 
 import javax.xml.crypto.Data;
 
+
 public class DatabaseManager extends UnicastRemoteObject implements DatabaseInterface {
 
-    /**
+    private static final String excelPath = "src/main/resources/static/xls/";
+    private static final String imagePath = "src/main/resources/static/images/";
+
+    File exelFolder = new File(excelPath);
+    File[] files = exelFolder.listFiles((dir, name) -> name.endsWith(".xlsx"));
+
+    private List<product> products = new ArrayList<product>();
+
+    /** 
      * Default constructor for DatabaseManager.
      * This constructor is required for RMI to create a remote object.
      * @throws RemoteException
@@ -34,4 +57,45 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         // TODO: Implement logic to update the database with the provided parameters
     }
 
+    private void loadDataBase() throws IOException {
+
+        if (files == null || files.length == 0) {
+            System.out.println("No Excel file found in the folder.");
+            return;
+        } else if (files.length > 1) {
+            System.out.println("More than one Excel file found in the folder. Only one file must exist.");
+            return;
+        }
+
+        File excelFile = files[0];
+
+        try(FileInputStream fis = new FileInputStream(excelFile);
+            Workbook workbook = new XSSFWorkbook(fis)) {
+            
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for(Row row : sheet) {
+                for(int i = 0; i < 5; ++i) {
+                    Cell cell = row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    System.out.print(getCellValue(cell) + "\t");
+                }
+            }
+
+        }
+    }
+
+    private String getCellValue(Cell cell) {
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                return String.valueOf(cell.getNumericCellValue());
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                return cell.getCellFormula();
+            default:
+                return "";
+        }
+    }
 }
