@@ -37,6 +37,12 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
      */
     protected DatabaseManager() throws RemoteException {
         super();
+
+        try {
+            loadDataBase();
+        } catch (IOException e) {
+            System.err.println("Error loading database: " + e.getMessage());
+        }
     }
 
     /**
@@ -59,6 +65,11 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
     private void loadDataBase() throws IOException {
 
+        /*
+         * Checks if there is an Excel file in the folder.
+         * If there is no file, it will print a message.
+         * If there are multiple files, it will print a message and exit.
+         */
         if (files == null || files.length == 0) {
             System.out.println("No Excel file found in the folder.");
             return;
@@ -67,20 +78,70 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
             return;
         }
 
+        // Load the single Excel file
         File excelFile = files[0];
 
+        // Load images from the image folder
+        File imageFolder = new File(imagePath);
+        File[] imageFiles = imageFolder.listFiles((dir, name) -> name.endsWith(".jpg") || name.endsWith(".png"));
+
+        /*
+         * Reads the Excel file and extracts product information.
+         * Then it matches the product ID with the image files in the image folder.
+         */
         try(FileInputStream fis = new FileInputStream(excelFile);
             Workbook workbook = new XSSFWorkbook(fis)) {
             
             Sheet sheet = workbook.getSheetAt(0);
+            
+            // Temporary cell and product objects
+            List<Cell> cells = new ArrayList<>();
+            product temProduct = new product("", 0, "", 0, 0, new ArrayList<String>());
+
+            int rowIndex = 0;
 
             for(Row row : sheet) {
-                for(int i = 0; i < 5; ++i) {
-                    Cell cell = row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-                    System.out.print(getCellValue(cell) + "\t");
-                }
-            }
 
+                // Skip the header rows
+                if(rowIndex > 2){
+                    
+                    // Load the product information from the row
+                    for(int i = 0; i < 5; ++i) {
+                        cells.add(row.getCell(i, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK));
+
+                        switch (i) {
+                            case 0:
+                                temProduct.setType(getCellValue(cells.get(i)));
+                                break;
+                            case 1:
+                                temProduct.setID((int) cells.get(i).getNumericCellValue());
+                                break;
+                            case 2:
+                                temProduct.setName(getCellValue(cells.get(i)));
+                                break;
+                            case 3:
+                                temProduct.setQuantity((int) cells.get(i).getNumericCellValue());
+                                break;
+                            case 4:
+                                temProduct.setPrice((int) cells.get(i).getNumericCellValue());
+                                break;
+                        }
+                    }
+
+                    // Match the product ID with the image files
+                    for (File image : imageFiles) {
+                        if(image.getName().startsWith(temProduct.getID() + "")) {
+                            temProduct.getImagePath().add(imagePath + image.getName());
+                        }
+                    }
+
+                    // Add the product to the list
+                    products.add(temProduct);
+                    
+                    cells.clear();
+                }
+                ++rowIndex;
+            }
         }
     }
 
@@ -96,6 +157,15 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
                 return cell.getCellFormula();
             default:
                 return "";
+        }
+    }
+
+
+    public static void main(String[] args) {
+        try {
+            new DatabaseManager();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

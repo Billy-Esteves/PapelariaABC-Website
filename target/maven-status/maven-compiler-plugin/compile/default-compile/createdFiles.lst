@@ -1,7 +1,9 @@
 com/website/AdminClient.class
 com/website/DatabaseManager.class
+com/website/DatabaseManager$1.class
 com/service/ABCWebsiteApplication.class
 com/website/GatewayServer.class
+com/website/product.class
 com/controller/WebsiteController.class
 com/website/GatewayInterface.class
 com/website/DatabaseInterface.class

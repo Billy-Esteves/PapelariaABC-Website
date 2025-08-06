@@ -1,0 +1,18 @@
+To run a given class:
+
+1 - Call any methods for quick testing wither in the main/start methods or in the "protected [class name]" method at the top of the code
+
+2 - Run a given class with : mvn compile exec:java -Dexec.mainClass="com.website.[name of the class]"
+(for example, for the DatabaseManager): mvn compile exec:java -Dexec.mainClass="com.website.DatabaseManager"
+
+3 - In a Java distributed system, the choice between having a main() method and a start() method depends on the role and responsibility of the class in your architecture:
+
+Use public static void main(String[] args) when:
+    - The class is the entry point of a standalone application or service.
+    - You run it directly (e.g., via command line or java command).
+    - You want to bootstrap an entire node/component (e.g., a website server, RMI registry, admin client).
+
+Use a start() method when:
+    - The class is part of a larger system and not the main entry point.
+    - It's a service/component that should be started by another controller (e.g., an AdminClient).
+    - You want to start/stop it dynamically, possibly from another class or over the network.
