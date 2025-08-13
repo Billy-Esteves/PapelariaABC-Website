@@ -54,7 +54,10 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         System.out.println("Fetching items with query: " + name + 
                            ", price range: " + price_min + "-" + price_max + 
                            ", type: " + type + ", ID: " + ID);
-        // TODO: Implement logic to fetch items from the database based on the search criteria
+        // Use Levenshtein distance to find similar names
+        // The Levenshtein algorithm counts how many insertions, deletions, or substitutions are needed to transform one string into another.
+        // If that number is less than or equal to your threshold X, you can consider them “similar.”
+        
     }
 
     @Override
