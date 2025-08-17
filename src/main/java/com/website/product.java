@@ -70,7 +70,17 @@ public class product {
     }
 
     public void setImagePath(List<String> imagePath) {
-        this.imagePath = imagePath;
+        if (imagePath == null) {
+            this.imagePath.clear();
+        } else {
+            this.imagePath = imagePath;
+        }
+    }
+
+    public void addImagePath(String imagePath) {
+        if (this.imagePath != null) {
+            this.imagePath.add(imagePath);
+        }
     }
 
 }

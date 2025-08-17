@@ -40,10 +40,11 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
         try {
             loadDataBase();
-            String temp1 = "salsaparrila";
-            String temp2 = "biosaparooling";
-            int distance = editDistance(temp1, temp2);
-            System.out.println("Edit distance between '" + temp1 + "' and '" + temp2 + "' is: " + distance);
+            List<product> results = dbFetch("cartolina", -1, -1, null, -1); // Example call to dbFetch
+            for (product p : results) {
+                System.out.println("\n-\nProduct ID: " + p.getID() + "\nName: " + String.join(" ", p.getName()) + "\nType: " + p.getType() + "\nPrice: " + p.getPrice() + "\nQuantity: " + p.getQuantity() + "\nImages: " + String.join(", ", p.getImagePath()));
+            }
+            
         } catch (IOException e) {
             System.err.println("Error loading database: " + e.getMessage());
         }
@@ -145,11 +146,12 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
             
             // Temporary cell and product objects
             List<Cell> cells = new ArrayList<>();
-            product temProduct = new product("", 0, "", 0, 0, new ArrayList<String>());
 
             int rowIndex = 0;
 
             for(Row row : sheet) {
+
+                product temProduct = new product("", 0, "", 0, 0, new ArrayList<String>());
 
                 // Skip the header rows
                 if(rowIndex > 2){
@@ -177,10 +179,11 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
                         }
                     }
 
+
                     // Match the product ID with the image files
                     for (File image : imageFiles) {
                         if(image.getName().startsWith(temProduct.getID() + "")) {
-                            temProduct.getImagePath().add(imagePath + image.getName());
+                            temProduct.addImagePath(imagePath + image.getName());
                         }
                     }
 
@@ -230,7 +233,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
             // Initialize the previous row with the current row's values
             prevRow = currentRow.clone();
 
-            System.out.printf("]\n[");
+            //System.out.printf("]\n[");
 
             for (int j = 0; j < string1.length(); ++j) {
 
@@ -241,13 +244,13 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
                 } else if (j == 0) {
                     currentRow[j] = i;
                 } else {
-                    if (string1.charAt(j) != string2.charAt(i)) {
+                    if (string1.toLowerCase().charAt(j) != string2.toLowerCase().charAt(i)) {
                         currentRow[j] = Math.min(Math.min(prevRow[j - 1], prevRow[j]), currentRow[j - 1]) + 1;
                     } else {
                         currentRow[j] = prevRow[j - 1];
                     }
                 }
-                System.out.printf(currentRow[j] + ", ");
+                //System.out.printf(currentRow[j] + ", ");
             }
         }
 
