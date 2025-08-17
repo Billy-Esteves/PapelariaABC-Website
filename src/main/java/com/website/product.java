@@ -7,7 +7,7 @@ public class product {
     private int ID;
     private List<String> name;
     private int quantity;
-    private int price;
+    private float price;
     private List<String> imagePath;   
 
     public product(String type, int ID, String name, int quantity, int price, List<String> imagePath) {
@@ -57,11 +57,11 @@ public class product {
         this.quantity = quantity;
     }
 
-    public int getPrice() {
+    public float getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 

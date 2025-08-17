@@ -55,7 +55,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
      * This method is intended to be called remotely to fetch items based on search criteria.
      */
     @Override
-    public List<product> dbFetch(String name, int price_min, int price_max, String type, int ID) throws RemoteException {
+    public List<product> dbFetch(String name, float price_min, float price_max, String type, int ID) throws RemoteException {
         System.out.println("Fetching items with query: " + name + 
                            ", price range: " + price_min + "-" + price_max + 
                            ", type: " + type + ", ID: " + ID);
@@ -174,7 +174,8 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
                                 temProduct.setQuantity((int) cells.get(i).getNumericCellValue());
                                 break;
                             case 4:
-                                temProduct.setPrice((int) cells.get(i).getNumericCellValue());
+                                temProduct.setPrice((float) cells.get(i).getNumericCellValue());
+                                System.out.println("Price: " + temProduct.getPrice());
                                 break;
                         }
                     }
