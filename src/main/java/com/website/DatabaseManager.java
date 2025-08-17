@@ -40,6 +40,10 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
         try {
             loadDataBase();
+            String temp1 = "salsaparrila";
+            String temp2 = "biosaparooling";
+            int distance = editDistance(temp1, temp2);
+            System.out.println("Edit distance between '" + temp1 + "' and '" + temp2 + "' is: " + distance);
         } catch (IOException e) {
             System.err.println("Error loading database: " + e.getMessage());
         }
@@ -57,7 +61,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         // Use Levenshtein distance to find similar names
         // The Levenshtein algorithm counts how many insertions, deletions, or substitutions are needed to transform one string into another.
         // If that number is less than or equal to your threshold X, you can consider them “similar.”
-        
+        // Also the search will present the top 15 results based on a scoring system that will be implemented later.
     }
 
     @Override
@@ -163,6 +167,50 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         }
     }
 
+    private int editDistance(String str1, String str2) {
+        String string1, string2;
+
+        // Ensure that string1 is the shorter string
+        if(str1.length() < str2.length()) {
+            string1 = " " + str1;
+            string2 = " " + str2;
+        } else {
+            string1 = " " + str2;
+            string2 = " " + str1;
+        }
+
+        //Distance storage rows of the size of the smaller string, in order to save memory
+        int prevRow[] = new int[string1.length()];
+        int currentRow[] = new int[string1.length()];
+
+        for (int i = 0; i < string2.length(); ++i) {
+
+            // Initialize the previous row with the current row's values
+            prevRow = currentRow.clone();
+
+            System.out.printf("]\n[");
+
+            for (int j = 0; j < string1.length(); ++j) {
+
+                currentRow[j] = 0;
+
+                if (i == 0) {
+                    currentRow[j] = j;
+                } else if (j == 0) {
+                    currentRow[j] = i;
+                } else {
+                    if (string1.charAt(j) != string2.charAt(i)) {
+                        currentRow[j] = Math.min(Math.min(prevRow[j - 1], prevRow[j]), currentRow[j - 1]) + 1;
+                    } else {
+                        currentRow[j] = prevRow[j - 1];
+                    }
+                }
+                System.out.printf(currentRow[j] + ", ");
+            }
+        }
+
+        return currentRow[currentRow.length - 1];
+    }
 
     public static void main(String[] args) {
         try {
