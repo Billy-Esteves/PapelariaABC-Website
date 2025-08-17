@@ -1,5 +1,6 @@
 package com.website;
 
+import java.util.List;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ public interface DatabaseInterface extends Remote {
      * @param ID
      * @throws RemoteException
      */
-    void dbFetch(String name, int price_min, int price_max, String type, int ID) throws RemoteException;
+    List<product> dbFetch(String name, int price_min, int price_max, String type, int ID) throws RemoteException;
 
     /**
      * Method to manage database operations such as creating, updating, or deleting entries.

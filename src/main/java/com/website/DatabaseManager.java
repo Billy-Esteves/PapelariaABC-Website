@@ -54,7 +54,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
      * This method is intended to be called remotely to fetch items based on search criteria.
      */
     @Override
-    public void dbFetch(String name, int price_min, int price_max, String type, int ID) throws RemoteException {
+    public List<product> dbFetch(String name, int price_min, int price_max, String type, int ID) throws RemoteException {
         System.out.println("Fetching items with query: " + name + 
                            ", price range: " + price_min + "-" + price_max + 
                            ", type: " + type + ", ID: " + ID);
@@ -62,6 +62,48 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         // The Levenshtein algorithm counts how many insertions, deletions, or substitutions are needed to transform one string into another.
         // If that number is less than or equal to your threshold X, you can consider them “similar.”
         // Also the search will present the top 15 results based on a scoring system that will be implemented later.
+        List<product> results = new ArrayList<>();
+
+        // If ID is provided, filter by ID only
+        if (ID != -1) {
+            for (product p : products) {
+                if (p.getID() == ID) {
+                    results.add(p);
+                    break; 
+                }
+            }
+        } else {
+
+            // If name is provided, filter by name using Levenshtein distance, else add all products
+            if (name != null && !name.isEmpty()) {
+                for (product p : products) {
+                    for (String n : p.getName()) {
+                        if (editDistance(n, name) <= 3) { // Threshold of 3 for similarity in any term of the product's name TODO: (change later)
+                            results.add(p);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                results.addAll(products);
+            }
+
+            // If type is provided, filter by type
+            if (type != null && !type.isEmpty()) {
+                results.removeIf(p -> !p.getType().equalsIgnoreCase(type));
+            }
+
+            // If price range is provided, min or max, filter by price range
+            if (price_min != -1){
+                results.removeIf(p -> p.getPrice() < price_min);
+            } 
+            if (price_max != -1) {
+                results.removeIf(p -> p.getPrice() > price_max);
+            }
+
+        } 
+
+        return results;
     }
 
     @Override

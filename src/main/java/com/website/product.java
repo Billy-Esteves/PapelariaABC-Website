@@ -5,7 +5,7 @@ import java.util.*;
 public class product {
     private String type;
     private int ID;
-    private String name;
+    private List<String> name;
     private int quantity;
     private int price;
     private List<String> imagePath;   
@@ -13,7 +13,10 @@ public class product {
     public product(String type, int ID, String name, int quantity, int price, List<String> imagePath) {
         this.type = type;
         this.ID = ID;
-        this.name = name;
+        this.name = new ArrayList<>();
+        for (String n : name.split(" ")) {
+            this.name.add(n.trim());
+        }
         this.quantity = quantity;
         this.price = price;
         this.imagePath = imagePath;
@@ -35,12 +38,15 @@ public class product {
         this.ID = ID;
     }   
 
-    public String getName() {
+    public List<String> getName() {
         return name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name.clear();
+        for (String n : name.split(" ")) {
+            this.name.add(n.trim());
+        }
     }
 
     public int getQuantity() {
