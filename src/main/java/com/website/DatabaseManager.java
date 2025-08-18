@@ -20,15 +20,40 @@ import java.awt.image.BufferedImage;
 import javax.xml.crypto.Data;
 
 
+
 public class DatabaseManager extends UnicastRemoteObject implements DatabaseInterface {
+
+    /**
+     * Class to hold product data along with a score for search results.
+     */
+    private static class resultData {
+        private product product;
+        private float score;
+
+        public resultData(product product, float score) {
+            this.product = product;
+            this.score = score;
+        }
+
+        public product getProduct() {
+            return product;
+        }
+
+        public float getScore() {
+            return score;
+        }
+    }
 
     private static final String excelPath = "src/main/resources/static/xls/";
     private static final String imagePath = "src/main/resources/static/images/";
+
+    float similarityThreshold = 0.7f; // Threshold for similarity in search results
 
     File exelFolder = new File(excelPath);
     File[] files = exelFolder.listFiles((dir, name) -> name.endsWith(".xlsx"));
 
     private List<product> products = new ArrayList<product>();
+
 
     /** 
      * Default constructor for DatabaseManager.
@@ -40,11 +65,13 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
         try {
             loadDataBase();
-            List<product> results = dbFetch("cartolina", -1, -1, null, -1); // Example call to dbFetch
+
+            /*
+            List<product> results = dbFetch("A4", -1, -1, null, -1); // Example call to dbFetch
             for (product p : results) {
                 System.out.println("\n-\nProduct ID: " + p.getID() + "\nName: " + String.join(" ", p.getName()) + "\nType: " + p.getType() + "\nPrice: " + p.getPrice() + "\nQuantity: " + p.getQuantity() + "\nImages: " + String.join(", ", p.getImagePath()));
             }
-            
+            */
         } catch (IOException e) {
             System.err.println("Error loading database: " + e.getMessage());
         }
@@ -56,14 +83,16 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
      */
     @Override
     public List<product> dbFetch(String name, float price_min, float price_max, String type, int ID) throws RemoteException {
+        /*
         System.out.println("Fetching items with query: " + name + 
                            ", price range: " + price_min + "-" + price_max + 
                            ", type: " + type + ", ID: " + ID);
-        // Use Levenshtein distance to find similar names
-        // The Levenshtein algorithm counts how many insertions, deletions, or substitutions are needed to transform one string into another.
-        // If that number is less than or equal to your threshold X, you can consider them “similar.”
+        */
+
         // Also the search will present the top 15 results based on a scoring system that will be implemented later.
+        
         List<product> results = new ArrayList<>();
+        int searchScore;
 
         // If ID is provided, filter by ID only
         if (ID != -1) {
@@ -77,14 +106,33 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
             // If name is provided, filter by name using Levenshtein distance, else add all products
             if (name != null && !name.isEmpty()) {
+
+                resultData tempResult;
+                List<resultData> resultDataList = new ArrayList<>();
+
                 for (product p : products) {
-                    for (String n : p.getName()) {
-                        if (editDistance(n, name) <= 3) { // Threshold of 3 for similarity in any term of the product's name TODO: (change later)
-                            results.add(p);
-                            break;
-                        }
+
+                    searchScore = searchMatch(Arrays.asList(name.split(" ")), p.getName());
+
+                    if (searchScore > 0) {
+                        tempResult = new resultData(p, searchScore);
+                        resultDataList.add(tempResult);
                     }
+                    
                 }
+
+                // Sort results based on score
+                resultDataList.sort((r1, r2) -> Float.compare(r2.getScore(), r1.getScore()));
+
+                for (resultData rd : resultDataList) {
+                    System.out.println("Product: " + rd.getProduct().getName() + ", Score: " + rd.getScore());
+                }
+
+                // Add top 15 results to the final results list
+                for (int i = 0; i < Math.min(15, resultDataList.size()); i++) {
+                    results.add(resultDataList.get(i).getProduct());
+                }
+
             } else {
                 results.addAll(products);
             }
@@ -107,12 +155,28 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         return results;
     }
 
+    /**
+     * Update the database with the provided parameters.
+     * This method allows Admin Clients to perform database management tasks.
+     * @param name
+     * @param price
+     * @param quantity
+     * @param type
+     * @param ID
+     * @throws RemoteException
+     */
     @Override
     public void dbUpdate(String name, int price, int quantity, String type, int ID) throws RemoteException {
         throw new UnsupportedOperationException("Unimplemented method 'dbUpdate'");
         // TODO: Implement logic to update the database with the provided parameters
     }
 
+    /**
+     * Loads the database from the Excel file and image folder.
+     * This method reads the Excel file and extracts product information.
+     * It also matches product IDs with image files in the image folder.
+     * @throws IOException
+     */
     private void loadDataBase() throws IOException {
 
         /*
@@ -175,7 +239,6 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
                                 break;
                             case 4:
                                 temProduct.setPrice((float) cells.get(i).getNumericCellValue());
-                                System.out.println("Price: " + temProduct.getPrice());
                                 break;
                         }
                     }
@@ -198,6 +261,12 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         }
     }
 
+    /**
+     * Gets the value of a cell as a string.
+     * This method is used to read the cell values from the Excel file.
+     * @param cell The cell to read
+     * @return The value of the cell as a string
+     */
     private String getCellValue(Cell cell) {
         switch (cell.getCellType()) {
             case STRING:
@@ -213,6 +282,13 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         }
     }
 
+    /**
+     * Calculates the Levenshtein distance between two strings.
+     * This method is used to calculate the similarity between search terms and product names.
+     * @param str1 First string
+     * @param str2 Second string
+     * @return The Levenshtein distance between the two strings
+     */
     private int editDistance(String str1, String str2) {
         String string1, string2;
 
@@ -256,6 +332,32 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         }
 
         return currentRow[currentRow.length - 1];
+    }
+
+    /**
+     * Searches for products that match the search terms.
+     * This method calculates a score based on the similarity of the search terms to the product names.
+     * @param searchTerms List of search terms
+     * @param productName List of product names
+     * @return The score based on the similarity of the search terms to the product names
+     */
+    private int searchMatch(List<String> searchTerms, List<String> productName) {
+        int score = 0;
+        float similarity;
+
+        for (String term : searchTerms) {
+            for (String name : productName) {
+
+                similarity = 1 - ((float) editDistance(term, name) / Math.max(term.length(), name.length()));
+
+                if (similarity > similarityThreshold) {
+                    ++score;
+                    break; // Stop checking once a match is found
+                }
+            }
+        }
+
+        return score;
     }
 
     public static void main(String[] args) {
