@@ -5,12 +5,12 @@ import java.util.*;
 public class product {
     private String type;
     private int ID;
-    private List<String> name;
+    private ArrayList<String> name;
     private int quantity;
     private float price;
-    private List<String> imagePath;   
+    private ArrayList<String> imagePath;   
 
-    public product(String type, int ID, String name, int quantity, int price, List<String> imagePath) {
+    public product(String type, int ID, String name, int quantity, int price, ArrayList<String> imagePath) {
         this.type = type;
         this.ID = ID;
         this.name = new ArrayList<>();
@@ -38,7 +38,7 @@ public class product {
         this.ID = ID;
     }   
 
-    public List<String> getName() {
+    public ArrayList<String> getName() {
         return name;
     }
 
@@ -65,11 +65,11 @@ public class product {
         this.price = price;
     }
 
-    public List<String> getImagePath() {
+    public ArrayList<String> getImagePath() {
         return imagePath;
     }
 
-    public void setImagePath(List<String> imagePath) {
+    public void setImagePath(ArrayList<String> imagePath) {
         if (imagePath == null) {
             this.imagePath.clear();
         } else {

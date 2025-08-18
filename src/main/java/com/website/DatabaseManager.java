@@ -7,14 +7,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 ///////////////////////////////////////////////////////
 
 import java.util.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.List;
-import java.util.ArrayList;
 import java.awt.image.BufferedImage;
 
 import javax.xml.crypto.Data;
@@ -52,7 +51,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
     File exelFolder = new File(excelPath);
     File[] files = exelFolder.listFiles((dir, name) -> name.endsWith(".xlsx"));
 
-    private List<product> products = new ArrayList<product>();
+    private ArrayList<product> products = new ArrayList<product>();
 
 
     /** 
@@ -65,6 +64,8 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
         try {
             loadDataBase();
+            ArrayList<String> images = new ArrayList<>();
+            dbUpdate("", 20, -1, "", 48, null, 2);
 
             /*
             List<product> results = dbFetch("A4", -1, -1, null, -1); // Example call to dbFetch
@@ -88,7 +89,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
      * @throws RemoteException
      */
     @Override
-    public List<product> dbFetch(String name, float price_min, float price_max, String type, int ID) throws RemoteException {
+    public ArrayList<product> dbFetch(String name, float price_min, float price_max, String type, int ID) throws RemoteException {
         /*
         System.out.println("Fetching items with query: " + name + 
                            ", price range: " + price_min + "-" + price_max + 
@@ -97,7 +98,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
         // Also the search will present the top 15 results based on a scoring system that will be implemented later.
         
-        List<product> results = new ArrayList<>();
+        ArrayList<product> results = new ArrayList<>();
         int searchScore;
 
         // If ID is provided, filter by ID only
@@ -114,11 +115,11 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
             if (name != null && !name.isEmpty()) {
 
                 resultData tempResult;
-                List<resultData> resultDataList = new ArrayList<>();
+                ArrayList<resultData> resultDataList = new ArrayList<>();
 
                 for (product p : products) {
 
-                    searchScore = searchMatch(Arrays.asList(name.split(" ")), p.getName());
+                    searchScore = searchMatch((ArrayList<String>) Arrays.asList(name.split(" ")), p.getName());
 
                     if (searchScore > 0) {
                         tempResult = new resultData(p, searchScore);
@@ -157,7 +158,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
             }
 
         } 
-
+        
         return results;
     }
 
@@ -169,12 +170,131 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
      * @param quantity Quantity of the product to update
      * @param type Type of the product to update
      * @param ID Product ID to update
+     * @param command Command to specify the operation: 0 for create, 1 for update, 2 for delete
      * @throws RemoteException
      */
-    @Override //TODO: Implement logic to update the database with the provided parameters
-    public void dbUpdate(String name, int price, int quantity, String type, int ID) throws RemoteException {
-        throw new UnsupportedOperationException("Unimplemented method 'dbUpdate'");
+    @Override
+    public void dbUpdate(String name, int price, int quantity, String type, int ID, ArrayList<String> images, int command) throws RemoteException {
+        //throw new UnsupportedOperationException("Unimplemented method 'dbUpdate'");
         // TODO: Implement logic to update the database with the provided parameters
+
+        boolean productFound = false;
+
+        switch (command) {
+            case 0: // Create
+                // Create a new product and add it to the list
+                product newProduct = new product(type, ID, name, quantity, price, images);
+                products.add(newProduct);
+                
+                break;
+
+            case 1: // Update
+                for (product p : products) {
+                    if (p.getID() == ID) {
+                        if (name != null && !name.isEmpty()) {
+                            p.setName(name);
+                        }
+                        if (price != -1) {
+                            p.setPrice(price);
+                        }
+                        if (quantity != -1) {
+                            p.setQuantity(quantity);
+                        }
+                        if (type != null && !type.isEmpty()) {
+                            p.setQuantity(quantity);
+                        }
+                        if (images != null && !images.isEmpty()) {
+                            p.setImagePath(images);
+                        }
+                        productFound = true;
+                        break;
+                    }
+                }
+                if (!productFound) {
+                    System.out.println("Product with ID " + ID + " not found for update.");
+                    return;
+                }
+                break;
+
+            case 2: // Delete
+                products.removeIf(p -> p.getID() == ID);
+                System.out.println("Product with ID " + ID + " deleted.");
+                break;
+
+            default:
+                System.out.println("Invalid command.");
+        }
+
+        if (files == null || files.length == 0) {
+            System.out.println("No Excel file found in the folder.");
+            return;
+        } else if (files.length > 1) {
+            System.out.println("More than one Excel file found in the folder. Only one file must exist.");
+            return;
+        }
+
+
+        // Load the single Excel file
+        File excelFile = files[0];
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("INVENTARIO 2025 - test modified");
+
+             // Create bold font and style
+            Font boldFont = workbook.createFont();
+            boldFont.setBold(true);
+
+            // Create centered and bold style
+            CellStyle boldCenterStyle = workbook.createCellStyle();
+            boldCenterStyle.setFont(boldFont);
+            boldCenterStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            // Create a cell style for Euro currency format
+            CellStyle euroStyle = workbook.createCellStyle();
+            DataFormat format = workbook.createDataFormat();
+            euroStyle.setDataFormat(format.getFormat("#,##0.00\" €\""));
+            
+            // First row: "INVENTÁRIO 2025 - test"
+            Row titleRow = sheet.createRow(0);
+            Cell titleCell = titleRow.createCell(2);
+            titleCell.setCellValue("INVENTÁRIO 2025 - test");
+            titleCell.setCellStyle(boldCenterStyle);
+
+            // Second row: "PAPELARIA ABC - TAROUCA 200225359"
+            Row subtitleRow = sheet.createRow(1);
+            Cell subtitleCell = subtitleRow.createCell(2);
+            subtitleCell.setCellValue("PAPELARIA ABC - TAROUCA 200225359");
+            subtitleCell.setCellStyle(boldCenterStyle);
+
+            // Third row: header
+            Row header = sheet.createRow(2);
+            String[] headers = {"Família", "Codigo", "Descrição", "Existência", "P. Custo", "Total"};
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(boldCenterStyle);
+            }
+
+            int rowIdx = 3;
+            for (product p : products) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(p.getType());
+                row.createCell(1).setCellValue(p.getID());
+                row.createCell(2).setCellValue(String.join(" ", p.getName()));
+                row.createCell(3).setCellValue(p.getQuantity());
+                row.createCell(4).setCellValue(p.getPrice());
+                row.getCell(4).setCellStyle(euroStyle);
+                row.createCell(5).setCellValue(p.getPrice() * p.getQuantity());
+                row.getCell(5).setCellStyle(euroStyle);
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(excelFile)) {
+                workbook.write(fos);
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error writing updated products to Excel: " + e.getMessage());
+        }
     }
 
     /**
@@ -215,7 +335,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
             Sheet sheet = workbook.getSheetAt(0);
             
             // Temporary cell and product objects
-            List<Cell> cells = new ArrayList<>();
+            ArrayList<Cell> cells = new ArrayList<>();
 
             int rowIndex = 0;
 
@@ -347,7 +467,7 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
      * @param productName List of product names
      * @return The score based on the similarity of the search terms to the product names
      */
-    private int searchMatch(List<String> searchTerms, List<String> productName) {
+    private int searchMatch(ArrayList<String> searchTerms, ArrayList<String> productName) {
         int score = 0;
         float similarity;
 
