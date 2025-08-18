@@ -78,8 +78,14 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
     }
 
     /**
-     * Fetch items from the database based on search criteria.
-     * This method is intended to be called remotely to fetch items based on search criteria.
+     * Fetches products from the database based on search criteria.
+     * This method allows clients to search for products by name, price range, type, and ID.
+     * @param name List of product names to search for
+     * @param price_min Minimum price for filtering products
+     * @param price_max Maximum price for filtering products
+     * @param type Type of product to filter by
+     * @param ID Product ID to filter by
+     * @throws RemoteException
      */
     @Override
     public List<product> dbFetch(String name, float price_min, float price_max, String type, int ID) throws RemoteException {
@@ -156,16 +162,16 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
     }
 
     /**
-     * Update the database with the provided parameters.
+     * Updates the database with the provided product information.
      * This method allows Admin Clients to perform database management tasks.
-     * @param name
-     * @param price
-     * @param quantity
-     * @param type
-     * @param ID
+     * @param name List of product names to update
+     * @param price Price of the product to update
+     * @param quantity Quantity of the product to update
+     * @param type Type of the product to update
+     * @param ID Product ID to update
      * @throws RemoteException
      */
-    @Override
+    @Override //TODO: Implement logic to update the database with the provided parameters
     public void dbUpdate(String name, int price, int quantity, String type, int ID) throws RemoteException {
         throw new UnsupportedOperationException("Unimplemented method 'dbUpdate'");
         // TODO: Implement logic to update the database with the provided parameters

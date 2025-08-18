@@ -12,13 +12,13 @@ import java.util.HashMap;
 public interface DatabaseInterface extends Remote {
     
     /**
-     * Method to perform search operations in the database.
-     * This method is intended to be called remotely to fetch items based on search criteria.
-     * @param name
-     * @param price_min
-     * @param price_max
-     * @param type
-     * @param ID
+     * Fetches products from the database based on search criteria.
+     * This method allows clients to search for products by name, price range, type, and ID.
+     * @param name List of product names to search for
+     * @param price_min Minimum price for filtering products
+     * @param price_max Maximum price for filtering products
+     * @param type Type of product to filter by
+     * @param ID Product ID to filter by
      * @throws RemoteException
      */
     List<product> dbFetch(String name, float price_min, float price_max, String type, int ID) throws RemoteException;
