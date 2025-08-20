@@ -16,3 +16,16 @@ Use a start() method when:
     - The class is part of a larger system and not the main entry point.
     - It's a service/component that should be started by another controller (e.g., an AdminClient).
     - You want to start/stop it dynamically, possibly from another class or over the network.
+
+Both DatabaseManager and GatewayServer need registries of their own. this is so they can run on different machines.
+
+General flow:
+
+1 - DatabaseManager starts up and creates its own registry
+2 - GatewayServer starts up, binds itself on DatabaseManager's registry and creates
+one of its own aswell
+4 - WebsiteController starts up and binds itself on GatewayServer's registry.
+Web clients interact with the web application (Spring Boot), managed by WebsiteController
+5 - AdminClient connects directly to GatewayServer through RMI.
+
+Each can be in its own respective machine.

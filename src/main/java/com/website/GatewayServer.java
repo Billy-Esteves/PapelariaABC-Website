@@ -48,9 +48,9 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
      * This method allows Admin Clients to perform database management tasks.
      */
     @Override
-    public void manageDB(String action, String name, int price, int quantity, String type, int ID) throws RemoteException {
+    public void manageDB(String name, int price, int quantity, String type, int ID, ArrayList<String> images, int command) throws RemoteException {
         // Implementation of manageDB method
-        System.out.println("Managing database: with action: " + action);
+        System.out.println("Managing database: with action: " + command);
         // TODO: logic to handle database operations based on the action and parameters
     }
 

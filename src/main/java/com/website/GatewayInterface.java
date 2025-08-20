@@ -2,6 +2,7 @@ package com.website;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -27,6 +28,6 @@ public interface GatewayInterface extends Remote {
      * @param params
      * @throws RemoteException
      */
-    void manageDB(String action, String name, int price, int quantity, String type, int ID) throws RemoteException;
+    void manageDB(String name, int price, int quantity, String type, int ID, ArrayList<String> images, int command) throws RemoteException;
  
 }

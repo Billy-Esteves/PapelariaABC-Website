@@ -13,6 +13,8 @@ import java.io.IOException;
 
 import java.util.*;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.awt.image.BufferedImage;
 
@@ -64,15 +66,6 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
         try {
             loadDataBase();
-            ArrayList<String> images = new ArrayList<>();
-            dbUpdate("", 20, -1, "", 48, null, 2);
-
-            /*
-            List<product> results = dbFetch("A4", -1, -1, null, -1); // Example call to dbFetch
-            for (product p : results) {
-                System.out.println("\n-\nProduct ID: " + p.getID() + "\nName: " + String.join(" ", p.getName()) + "\nType: " + p.getType() + "\nPrice: " + p.getPrice() + "\nQuantity: " + p.getQuantity() + "\nImages: " + String.join(", ", p.getImagePath()));
-            }
-            */
         } catch (IOException e) {
             System.err.println("Error loading database: " + e.getMessage());
         }
@@ -486,11 +479,35 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         return score;
     }
 
+    /*
     public static void main(String[] args) {
+        boolean registryLocated = false;
+        Registry registry = null;
+        
         try {
-            new DatabaseManager();
+            // Locate the RMI registry
+            while (registryLocated) {
+                try {
+                    registry = LocateRegistry.getRegistry(1099);
+                    registryLocated = true;
+                } catch (Exception e) {
+                    System.out.println("RMI registry not found. Trying again in 3 seconds...");
+                    registryLocated = false;
+                    Thread.sleep(3000);
+                }
+            }
+
+            System.out.println("RMI registry found. Starting DatabaseManager...");
+
+            // Create an instance of DatabaseManager and bind it to the RMI registry
+            DatabaseManager dbManager = new DatabaseManager();
+            registry.rebind("DatabaseManager", dbManager);
+
+            System.out.println("DatabaseManager: ready.");
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+        */
 }
