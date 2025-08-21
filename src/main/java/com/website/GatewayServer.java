@@ -20,7 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class GatewayServer extends UnicastRemoteObject implements GatewayInterface {
-    
+
+    private static int gatewayRegistryPort = 1098; // Port for GatewayServer's RMI registry
+    private static int databaseManagerRegistryPort = 1099; // Port for DatabaseManager's RMI registry
+    // declare the database manager interface
+    private DatabaseInterface databaseManager;
+
     /**
      * Default constructor for GatewayServer.
      * This constructor is required for RMI to create a remote object.
@@ -28,6 +33,11 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
      */
     protected GatewayServer() throws RemoteException {
         super();
+    }
+
+    @Override
+    public void setDatabaseManager(DatabaseInterface db) {
+        this.databaseManager = db;
     }
 
     /**
@@ -41,6 +51,7 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
                            ", price range: " + price_min + "-" + price_max + 
                            ", type: " + type + ", ID: " + ID);
         // TODO: logic to perform search operation, e.g., querying a database or an external API
+    
     }
 
     /**
@@ -52,6 +63,47 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
         // Implementation of manageDB method
         System.out.println("Managing database: with action: " + command);
         // TODO: logic to handle database operations based on the action and parameters
+    
     }
 
+    public static void main (String[] args) throws NotBoundException {
+        Registry gatewayRegistry = null;
+        Registry databaseManagerRegistry = null;
+
+        try {
+
+            // Locate/Create GatewayServers's RMI registry
+            try {
+                gatewayRegistry = LocateRegistry.getRegistry(gatewayRegistryPort);
+            } catch (Exception e) {
+                System.out.println("RMI registry not found. Creating one...");
+                gatewayRegistry = LocateRegistry.createRegistry(gatewayRegistryPort);
+            }  
+
+            System.out.println("RMI registry available. Starting GatewayServer...");
+
+            // Create an instance of GatewayServer and bind it to the registry
+            GatewayServer gatewayServer = new GatewayServer();
+            gatewayRegistry.rebind("GatewayServer", gatewayServer);
+
+            // Locate DatabaseManager's stub from its registry
+            databaseManagerRegistry = LocateRegistry.getRegistry(databaseManagerRegistryPort);
+            DatabaseInterface dbStub = (DatabaseInterface) databaseManagerRegistry.lookup("DatabseManager");
+            
+            // Set the database manager in the GatewayServer instance previously created
+            gatewayServer.setDatabaseManager(dbStub);
+
+        } catch (RemoteException e) {
+            System.err.println("RemoteException occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (NotBoundException e) {
+            System.err.println("NotBoundException occurred: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            System.out.println("GatewayServer is ready and waiting for requests...");
+        }
+    }
 }

@@ -21,9 +21,13 @@ Both DatabaseManager and GatewayServer need registries of their own. this is so 
 
 General flow:
 
-1 - DatabaseManager starts up and creates its own registry
+1 - DatabaseManager starts up and creates its own registry, creating an instance of itself
+that will be bound to the registry, so others can use it through its stub.
 2 - GatewayServer starts up, binds itself on DatabaseManager's registry and creates
-one of its own aswell
+one of its own aswell, creating an instance of itself so it can be bou d to the registry and
+used by others.
+It then has a variable to hold the databaseManager interface and set it to the stub of the
+database registry.
 4 - WebsiteController starts up and binds itself on GatewayServer's registry.
 Web clients interact with the web application (Spring Boot), managed by WebsiteController
 5 - AdminClient connects directly to GatewayServer through RMI.

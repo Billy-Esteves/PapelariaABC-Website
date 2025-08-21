@@ -12,6 +12,8 @@ import java.util.Set;
  */
 public interface GatewayInterface extends Remote {
 
+    public void setDatabaseManager(DatabaseInterface db) throws RemoteException;
+
     /**
      * Search for items based on a query string.
      * This method is intended to be called remotely to perform a search operation.

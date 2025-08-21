@@ -55,6 +55,8 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
     private ArrayList<product> products = new ArrayList<product>();
 
+    private static int databaseManagerRegistryPort = 1099;
+
 
     /** 
      * Default constructor for DatabaseManager.
@@ -479,29 +481,25 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         return score;
     }
 
-    /*
+
     public static void main(String[] args) {
-        boolean registryLocated = false;
-        Registry registry = null;
+        Registry databaseManagerRegistry = null;
         
         try {
-            // Locate the RMI registry
-            while (registryLocated) {
-                try {
-                    registry = LocateRegistry.getRegistry(1099);
-                    registryLocated = true;
-                } catch (Exception e) {
-                    System.out.println("RMI registry not found. Trying again in 3 seconds...");
-                    registryLocated = false;
-                    Thread.sleep(3000);
-                }
+            // Locate/Create DatabaseManager's RMI registry
+            try {
+                databaseManagerRegistry = LocateRegistry.getRegistry(databaseManagerRegistryPort);
+            } catch (Exception e) {
+                System.out.println("RMI registry not found. Creating one...");
+                databaseManagerRegistry = LocateRegistry.createRegistry(databaseManagerRegistryPort);
+                Thread.sleep(3000);
             }
 
-            System.out.println("RMI registry found. Starting DatabaseManager...");
+            System.out.println("RMI registry available. Starting DatabaseManager...");
 
             // Create an instance of DatabaseManager and bind it to the RMI registry
             DatabaseManager dbManager = new DatabaseManager();
-            registry.rebind("DatabaseManager", dbManager);
+            databaseManagerRegistry.rebind("DatabaseManager", dbManager);
 
             System.out.println("DatabaseManager: ready.");
 
@@ -509,5 +507,5 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
             e.printStackTrace();
         }
     }
-        */
+        
 }
