@@ -122,7 +122,8 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
                     }
                     
                 }
-
+                // TODO: somewhere im returning Array$ArrayList<product> instead of ArrayList<resultData> reacause of .asList() method,
+                // which causes an error when Gateway requests a search
                 // Sort results based on score
                 resultDataList.sort((r1, r2) -> Float.compare(r2.getScore(), r1.getScore()));
 
