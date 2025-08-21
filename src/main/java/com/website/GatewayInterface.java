@@ -18,9 +18,15 @@ public interface GatewayInterface extends Remote {
      * Search for items based on a query string.
      * This method is intended to be called remotely to perform a search operation.
      * @param query
+     * @param price_min
+     * @param price_max
+     * @param type
+     * @param ID
+     * @return List of products matching the search criteria.
+     *         Returns an empty list if no products match the criteria or if an error occurs.
      * @throws RemoteException
      */
-    void searchItems(String name, int price_min, int price_max, String type, int ID) throws RemoteException;
+    ArrayList<product> searchItems(String name, int price_min, int price_max, String type, int ID) throws RemoteException;
 
     /**
      * Manage database operations such as creating, updating, or deleting entries.

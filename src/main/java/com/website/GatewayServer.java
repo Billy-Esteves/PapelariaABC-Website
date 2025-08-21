@@ -32,6 +32,7 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
      * @throws RemoteException
      */
     protected GatewayServer() throws RemoteException {
+
         super();
     }
 
@@ -45,13 +46,22 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
      * This method is intended to be called remotely to perform a search operation.
      */
     @Override
-    public void searchItems(String name, int price_min, int price_max, String type, int ID) throws RemoteException {
+    public ArrayList<product> searchItems(String name, int price_min, int price_max, String type, int ID) throws RemoteException {
         // Implementation of searchItems method
         System.out.println("Searching for items with query: " + name + 
                            ", price range: " + price_min + "-" + price_max + 
                            ", type: " + type + ", ID: " + ID);
         // TODO: logic to perform search operation, e.g., querying a database or an external API
-    
+        
+        if (databaseManager != null) {
+            try {
+                return databaseManager.dbFetch(name, price_min, price_max, type, ID);
+            } catch (RemoteException e) {
+                System.err.println("RemoteException occurred while fetching items: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return new ArrayList<product>();
     }
 
     /**
@@ -66,6 +76,8 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
     
     }
 
+    /* 
+    // TODO: add IP adress to RMI registry creation/connection
     public static void main (String[] args) throws NotBoundException {
         Registry gatewayRegistry = null;
         Registry databaseManagerRegistry = null;
@@ -74,11 +86,12 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
 
             // Locate/Create GatewayServers's RMI registry
             try {
-                gatewayRegistry = LocateRegistry.getRegistry(gatewayRegistryPort);
-            } catch (Exception e) {
-                System.out.println("RMI registry not found. Creating one...");
                 gatewayRegistry = LocateRegistry.createRegistry(gatewayRegistryPort);
-            }  
+                System.out.println("RMI registry created on port " + gatewayRegistryPort);
+            } catch (Exception e) {
+                gatewayRegistry = LocateRegistry.getRegistry(gatewayRegistryPort);
+                System.out.println("RMI registry already running on port " + gatewayRegistryPort);
+            } 
 
             System.out.println("RMI registry available. Starting GatewayServer...");
 
@@ -88,7 +101,7 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
 
             // Locate DatabaseManager's stub from its registry
             databaseManagerRegistry = LocateRegistry.getRegistry(databaseManagerRegistryPort);
-            DatabaseInterface dbStub = (DatabaseInterface) databaseManagerRegistry.lookup("DatabseManager");
+            DatabaseInterface dbStub = (DatabaseInterface) databaseManagerRegistry.lookup("DatabaseManager");
             
             // Set the database manager in the GatewayServer instance previously created
             gatewayServer.setDatabaseManager(dbStub);
@@ -105,5 +118,7 @@ public class GatewayServer extends UnicastRemoteObject implements GatewayInterfa
         } finally {
             System.out.println("GatewayServer is ready and waiting for requests...");
         }
+        
     }
+    */
 }

@@ -170,9 +170,6 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
      */
     @Override
     public void dbUpdate(String name, int price, int quantity, String type, int ID, ArrayList<String> images, int command) throws RemoteException {
-        //throw new UnsupportedOperationException("Unimplemented method 'dbUpdate'");
-        // TODO: Implement logic to update the database with the provided parameters
-
         boolean productFound = false;
 
         switch (command) {
@@ -481,18 +478,18 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
         return score;
     }
 
-
+    // TODO: add IP adress to RMI registry creation/connection
     public static void main(String[] args) {
         Registry databaseManagerRegistry = null;
         
         try {
             // Locate/Create DatabaseManager's RMI registry
             try {
-                databaseManagerRegistry = LocateRegistry.getRegistry(databaseManagerRegistryPort);
-            } catch (Exception e) {
-                System.out.println("RMI registry not found. Creating one...");
                 databaseManagerRegistry = LocateRegistry.createRegistry(databaseManagerRegistryPort);
-                Thread.sleep(3000);
+                System.out.println("RMI registry created on port " + databaseManagerRegistryPort);
+            } catch (Exception e) {
+                databaseManagerRegistry = LocateRegistry.getRegistry(databaseManagerRegistryPort);
+                System.out.println("RMI registry already running on port " + databaseManagerRegistryPort);
             }
 
             System.out.println("RMI registry available. Starting DatabaseManager...");
@@ -505,6 +502,14 @@ public class DatabaseManager extends UnicastRemoteObject implements DatabaseInte
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        synchronized (DatabaseManager.class) {
+            try {
+                DatabaseManager.class.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
         

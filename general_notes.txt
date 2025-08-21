@@ -5,6 +5,8 @@ To run a given class:
 2 - Run a given class with : mvn compile exec:java -Dexec.mainClass="com.website.[name of the class]"
 (for example, for the DatabaseManager): mvn compile exec:java -Dexec.mainClass="com.website.DatabaseManager"
 
+To confirm that ports are being used by registrires, in powershel terminal type: netstat -ano | findstr :[port number]
+
 3 - In a Java distributed system, the choice between having a main() method and a start() method depends on the role and responsibility of the class in your architecture:
 
 Use public static void main(String[] args) when:
